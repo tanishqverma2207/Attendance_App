@@ -1,6 +1,6 @@
 {
   "smtp_host": "smtp.gmail.com",
   "smtp_port": 587,
-  "sender_email": "tanishqverma2207@gmail.com",
-  "sender_app_password": "dkntcvueaeivirpt"
+  "sender_email": "example@gmail.com",
+  "sender_app_password": "f"
 }
