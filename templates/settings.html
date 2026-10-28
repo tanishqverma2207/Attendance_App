@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <span class="eyebrow">Configuration</span>
+  <h2>Settings</h2>
+  <p class="muted">Everything here can be changed anytime — no code edits needed.</p>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0;">Run this app locally</h3>
+  <p class="muted">Copy this into a terminal, from inside the unzipped <span class="mono">attendance-app</span> folder.</p>
+  <div style="position:relative;">
+    <pre id="setupCmd" style="background:#16233A; color:#DCE3E1; padding:14px 16px; border-radius:8px; font-family:var(--font-mono); font-size:12.5px; line-height:1.7; overflow-x:auto; margin-top:8px;">cd attendance-app
+python3 -m venv venv
+source venv/bin/activate      # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+python app.py</pre>
+    <button type="button" onclick="copySetupCmd()" class="btn-secondary" style="position:absolute; top:8px; right:8px; margin:0; padding:5px 12px; font-size:12px;" id="copyBtn">Copy</button>
+  </div>
+</div>
+
+<form action="{{ url_for('settings') }}" method="post">
+  <div class="card">
+    <h3 style="margin-top:0;">Sender email (SMTP)</h3>
+    <p class="muted">For Gmail: use an App Password, not the real account password. Generate one at
+      myaccount.google.com → Security → App Passwords (2-Step Verification must be on).</p>
+
+    <div class="row2">
+      <div>
+        <label>SMTP host</label>
+        <input type="text" name="smtp_host" value="{{ cfg.smtp_host or 'smtp.gmail.com' }}">
+      </div>
+      <div>
+        <label>SMTP port</label>
+        <input type="number" name="smtp_port" value="{{ cfg.smtp_port or 587 }}">
+      </div>
+    </div>
+
+    <label>Sender email</label>
+    <input type="email" name="sender_email" value="{{ cfg.sender_email or '' }}" placeholder="hr@company.com">
+
+    <label>App password</label>
+    <input type="password" name="sender_app_password" value="{{ cfg.sender_app_password or '' }}">
+    <div class="field-hint">16 characters, no spaces.</div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Email template</h3>
+    <p class="muted">Available placeholders — keep the curly braces, they get swapped for real values automatically: <span class="mono">{name}</span> <span class="mono">{date_from}</span> <span class="mono">{date_to}</span></p>
+
+    <label>Subject</label>
+    <input type="text" name="tpl_subject" value="{{ template.subject }}">
+
+    <label>Intro (shown above the table)</label>
+    <textarea name="tpl_intro" rows="5">{{ template.intro }}</textarea>
+
+    <label>Outro (shown below the table)</label>
+    <textarea name="tpl_outro" rows="3">{{ template.outro }}</textarea>
+  </div>
+
+  <div class="card">
+    <button type="submit" class="btn-primary">Save Settings</button>
+  </div>
+</form>
+<script>
+  function copySetupCmd(){
+    var text = document.getElementById('setupCmd').innerText;
+    navigator.clipboard.writeText(text).then(function(){
+      var btn = document.getElementById('copyBtn');
+      var original = btn.textContent;
+      btn.textContent = 'Copied!';
+      setTimeout(function(){ btn.textContent = original; }, 1500);
+    });
+  }
+</script>
+{% endblock %}

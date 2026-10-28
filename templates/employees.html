@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  .emp-grid{ display:grid; grid-template-columns:110px 1fr 1fr 1fr 1fr auto; gap:8px; align-items:center; }
+  .emp-grid .head{ font-size:11px; text-transform:uppercase; letter-spacing:0.4px; color:var(--muted); font-weight:600; padding-bottom:6px; border-bottom:1px solid var(--line); margin-bottom:6px; }
+  .emp-row{ display:contents; }
+  .emp-row .cell{ padding:6px 0; }
+  .emp-row input{ margin:0; }
+</style>
+
+<div class="card">
+  <span class="eyebrow">Employee Directory</span>
+  <h2>Employees</h2>
+  <p class="muted">Employee Code must match the code used in the sumHR CSV export exactly. Edit a row and hit Save, or use the form at the bottom to add someone new.</p>
+</div>
+
+<div class="card">
+  <div class="emp-grid">
+    <div class="head">Code</div><div class="head">Name</div><div class="head">Email</div><div class="head">Manager Email</div><div class="head">Department</div><div class="head"></div>
+    {% for row in rows %}
+    <form class="emp-row" action="{{ url_for('employees_save') }}" method="post">
+      <div class="cell mono">
+        <input type="hidden" name="code" value="{{ row['Employee Code'] }}">{{ row['Employee Code'] }}
+      </div>
+      <div class="cell"><input type="text" name="name" value="{{ row['Employee Name'] }}"></div>
+      <div class="cell"><input type="email" name="email" value="{{ row['Email ID'] }}"></div>
+      <div class="cell"><input type="email" name="manager_email" value="{{ row['Manager Email'] }}"></div>
+      <div class="cell"><input type="text" name="department" value="{{ row['Department'] }}"></div>
+      <div class="cell" style="white-space:nowrap;">
+        <button type="submit" class="btn-secondary" style="margin:0; padding:6px 12px; font-size:12px;">Save</button>
+        <button type="submit" formaction="{{ url_for('employees_delete', code=row['Employee Code']) }}"
+                class="btn-outline-warn" style="margin:0; margin-left:6px; padding:6px 12px; font-size:12px;"
+                onclick="return confirm('Remove {{ row['Employee Code'] }} from the directory?');">Remove</button>
+      </div>
+    </form>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0;">Add an employee</h3>
+  <form action="{{ url_for('employees_save') }}" method="post">
+    <div class="row2">
+      <div>
+        <label>Employee Code</label>
+        <input type="text" name="code" placeholder="BA0009" required>
+      </div>
+      <div>
+        <label>Employee Name</label>
+        <input type="text" name="name" placeholder="Jane Doe">
+      </div>
+    </div>
+    <div class="row2">
+      <div>
+        <label>Email</label>
+        <input type="email" name="email" placeholder="jane@company.com">
+      </div>
+      <div>
+        <label>Manager Email</label>
+        <input type="email" name="manager_email" placeholder="optional">
+      </div>
+    </div>
+    <label>Department</label>
+    <input type="text" name="department" placeholder="optional">
+
+    <button type="submit" class="btn-primary">Add Employee</button>
+  </form>
+</div>
+{% endblock %}

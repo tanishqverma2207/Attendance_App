@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <span class="eyebrow">Preview</span>
+  <h2>{{ emp.name }} <span class="employee-code">{{ emp.code }}</span></h2>
+  <p class="muted">This is exactly what will land in their inbox — nothing is sent from this page.</p>
+
+  <div style="border:1px solid var(--line); border-radius:8px; margin-top:16px; overflow:hidden;">
+    <div style="background:#F7F8F8; padding:10px 16px; border-bottom:1px solid var(--line); font-size:13px;">
+      <strong>Subject:</strong> {{ subject }}<br>
+      <strong>To:</strong> {{ emp.email or "(no email on file)" }}
+    </div>
+    <div style="padding:18px 16px;">
+      {{ html_body | safe }}
+    </div>
+  </div>
+
+  <a class="btn btn-secondary" href="{{ url_for('review', upload_id=upload_id) }}" style="margin-top:20px;">Back to Review</a>
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <span class="eyebrow">Send History</span>
+  <h2>Past batches</h2>
+  <p class="muted">Every send (reviewed or direct) gets logged here so you know what's already gone out.</p>
+</div>
+
+{% if batches|length == 0 %}
+<div class="card">
+  <p class="muted">Nothing sent yet.</p>
+</div>
+{% endif %}
+
+{% for batch in batches %}
+<div class="card">
+  <div class="employee-header">
+    <div>
+      <span class="employee-name">{{ batch.timestamp }}</span>
+      <span class="employee-code">{{ batch.date_from or "start" }} → {{ batch.date_to or "end" }}</span>
+      <span class="cat-tag" style="background:{% if batch.mode == 'direct' %}#F8E4E2{% else %}#DCEDEA{% endif %}; color:{% if batch.mode == 'direct' %}#C1443C{% else %}#2F7A6B{% endif %}; margin-left:8px;">
+        {{ "Sent Directly" if batch.mode == "direct" else "Reviewed First" }}
+      </span>
+    </div>
+    <span class="badge badge-count">{{ batch.sent_count }} / {{ batch.total_count }} sent</span>
+  </div>
+
+  <p class="muted" style="margin-top:10px;">
+    Categories checked: {% for c in batch.categories %}{{ category_labels.get(c, c) }}{% if not loop.last %}, {% endif %}{% endfor %}
+  </p>
+
+  <details style="margin-top:8px;">
+    <summary style="cursor:pointer; font-size:13px; font-weight:600; color:var(--muted);">Show recipients</summary>
+    <table>
+      <tr><th>Employee</th><th class="mono">Code</th><th>Status</th></tr>
+      {% for r in batch.results %}
+      <tr>
+        <td>{{ r.name }}</td>
+        <td class="mono">{{ r.code }}</td>
+        <td>
+          {% if r.status == "SENT" %}
+            <span class="cat-tag" style="background:#DCEDEA;color:#2F7A6B;">Sent</span>
+          {% elif "SKIPPED" in r.status %}
+            <span class="cat-tag" style="background:#EEF1F5;color:#5B6B70;">{{ r.status }}</span>
+          {% else %}
+            <span class="cat-tag" style="background:#F8E4E2;color:#C1443C;">{{ r.status }}</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </details>
+</div>
+{% endfor %}
+{% endblock %}

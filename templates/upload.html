@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <span class="eyebrow">Step 1 of 3</span>
+  <div class="steps">
+    <div class="step active"><span class="dot">1</span> Upload</div>
+    <div class="step-line"></div>
+    <div class="step"><span class="dot">2</span> Review</div>
+    <div class="step-line"></div>
+    <div class="step"><span class="dot">3</span> Send</div>
+  </div>
+
+  <h2>Upload the attendance file</h2>
+  <p class="muted">Drop in the CSV exported from sumHR. Narrow it to a date range if you like, and pick only the issue types you want checked this round — nothing outside your selection gets touched.</p>
+
+  <form id="uploadForm" action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
+    <label>Attendance CSV file</label>
+    <input type="file" name="attendance_file" accept=".csv" required>
+
+    <div class="row2">
+      <div>
+        <label>Date from</label>
+        <input type="date" name="date_from">
+        <div class="field-hint">Leave blank to use the whole file</div>
+      </div>
+      <div>
+        <label>Date to</label>
+        <input type="date" name="date_to">
+      </div>
+    </div>
+
+    <label>Which issues should be checked?</label>
+    <div class="chip-grid">
+      {% for key, label in categories.items() %}
+        <label class="chip" for="cat_{{ key }}">
+          <input type="checkbox" name="categories" value="{{ key }}" id="cat_{{ key }}" checked>
+          <span class="cat-name"><span class="cat-dot" style="background:{{ category_colors[key] }};"></span>{{ label.split(' (')[0] }}</span>
+          {% if '(' in label %}<span class="field-hint" style="margin-top:2px;">{{ '(' + label.split('(')[1] }}</span>{% endif %}
+        </label>
+      {% endfor %}
+    </div>
+
+    <hr class="divider">
+
+    <button type="submit" class="btn-primary">Generate Review List</button>
+    <button type="button" class="btn-outline-warn" onclick="customConfirm('This skips the review step and emails everyone flagged (with an email on file) right now.', 'uploadForm', '{{ url_for('send_direct') }}')">Send Directly — Skip Review</button>
+  </form>
+</div>
+{% endblock %}

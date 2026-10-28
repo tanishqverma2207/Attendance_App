@@ -1,0 +1,5 @@
+{
+  "subject": "Attendance Discrepancy Notice - {name} ({date_from} to {date_to})",
+  "intro": "Hi {name},\r\n\r\nThe following attendance discrepancies were noticed for the period {date_from} to {date_to}. Please review and respond if any correction or clarification is needed.\r\n",
+  "outro": "Regards,\r\nHR Team"
+}

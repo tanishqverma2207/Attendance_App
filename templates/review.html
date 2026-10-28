@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <span class="eyebrow">Step 2 of 3</span>
+  <div class="steps">
+    <div class="step"><span class="dot">1</span> Upload</div>
+    <div class="step-line"></div>
+    <div class="step active"><span class="dot">2</span> Review</div>
+    <div class="step-line"></div>
+    <div class="step"><span class="dot">3</span> Send</div>
+  </div>
+
+  <h2>Review before sending</h2>
+  <p class="muted">Period {{ date_from or "start" }} → {{ date_to or "end" }}. Untick anyone you don't want to email this round.</p>
+
+  <div class="stat-strip">
+    <div class="stat"><span class="num">{{ employees|length }}</span><span class="lbl">Flagged</span></div>
+    <div class="stat"><span class="num">{{ employees|length - missing_email_codes|length }}</span><span class="lbl">Ready to send</span></div>
+    <div class="stat"><span class="num">{{ missing_email_codes|length }}</span><span class="lbl">Missing email</span></div>
+  </div>
+
+  {% if not has_config %}
+    <div class="flash">Email sending isn't set up yet. You can still review the list now, but go to <a href="{{ url_for('settings') }}">Settings</a> to add SMTP details before sending.</div>
+  {% endif %}
+
+  {% if missing_email_codes %}
+    <div class="flash">No email on file for: <strong>{{ missing_email_codes|join(", ") }}</strong> — these will be skipped. Add them to <span class="mono">data/employee_mapping.csv</span> and re-upload if needed.</div>
+  {% endif %}
+</div>
+
+{% if employees|length == 0 %}
+<div class="card">
+  <p class="muted">No issues found for the selected categories / date range. Nothing to send.</p>
+  <a class="btn btn-secondary" href="{{ url_for('index') }}">Back to Upload</a>
+</div>
+{% else %}
+<form id="sendForm" action="{{ url_for('send', upload_id=upload_id) }}" method="post">
+  <div class="card">
+    <div class="checkbox-row">
+      <input type="checkbox" name="cc_manager" id="cc_manager">
+      <label for="cc_manager">CC each employee's manager (needs "Manager Email" filled in employee_mapping.csv)</label>
+    </div>
+  </div>
+
+  {% for code, emp in employees.items() %}
+  {% set has_anomaly = emp.issues|selectattr("category", "equalto", "anomaly")|list|length > 0 %}
+  {% set has_leave_missing = emp.issues|selectattr("category", "equalto", "leave_reason_missing")|list|length > 0 %}
+  <div class="card employee-block {% if has_anomaly %}has-anomaly{% elif has_leave_missing %}has-red{% endif %}">
+    <div class="employee-header">
+      <div class="checkbox-row" style="margin-top:0;">
+        <input type="checkbox" name="include" value="{{ code }}" id="inc_{{ code }}" checked {% if not emp.email %}disabled{% endif %}>
+        <label for="inc_{{ code }}">
+          <span class="employee-name">{{ emp.name }}</span><span class="employee-code">{{ code }}</span>
+          {% if not emp.email %}<span class="badge badge-warn">No email on file</span>{% endif %}
+        </label>
+      </div>
+      <span class="badge badge-count">{{ emp.issues|length }} issue{{ 's' if emp.issues|length != 1 }}</span>
+    </div>
+    <table>
+      <tr><th>Date</th><th>Day</th><th>Issue</th><th class="mono">In</th><th class="mono">Out</th></tr>
+      {% for issue in emp.issues %}
+      <tr>
+        <td class="mono">{{ issue.date }}</td>
+        <td>{{ issue.day }}</td>
+        <td><span class="cat-tag cat-{{ issue.category }}">{{ category_labels[issue.category] }}</span></td>
+        <td class="mono">{{ issue.in_time }}</td>
+        <td class="mono">{{ issue.out_time }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+  {% endfor %}
+
+  <div class="card">
+    <h3 style="margin-top:0;">Preview an email</h3>
+    <p class="muted">See exactly what one employee will receive before sending to everyone.</p>
+    <div style="display:flex; gap:10px; align-items:flex-end;">
+      <div style="flex:1;">
+        <label style="margin-top:0;">Employee</label>
+        <select id="previewSelect">
+          {% for code, emp in employees.items() %}
+            <option value="{{ code }}">{{ emp.name }} ({{ code }})</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="button" class="btn-secondary" style="margin-top:6px;" onclick="openPreview()">Preview Email</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <button type="button" class="btn-primary" onclick="customConfirm('This will send the email to every ticked employee above. Continue?', 'sendForm', null)">Send Emails to Selected Employees</button>
+    <a class="btn btn-secondary" href="{{ url_for('index') }}">Cancel / Start Over</a>
+  </div>
+</form>
+<script>
+  function openPreview(){
+    var code = document.getElementById('previewSelect').value;
+    window.open('{{ url_for("preview", upload_id=upload_id) }}?code=' + encodeURIComponent(code), '_blank');
+  }
+</script>
+{% endif %}
+{% endblock %}

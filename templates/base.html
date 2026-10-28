@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Bancapp Automation — Attendance Mailer{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#16233A;
+    --paper:#F4F6F5;
+    --surface:#FFFFFF;
+    --line:#DCE3E1;
+    --amber:#D9932E;
+    --amber-dark:#B4761F;
+    --teal:#2F7A6B;
+    --red:#C1443C;
+    --purple:#7C5CBF;
+    --blue:#3B6E96;
+    --muted:#5B6B70;
+    --radius:10px;
+    --font-ui: 'IBM Plex Sans', Arial, sans-serif;
+    --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    font-family:var(--font-ui); background:var(--paper); margin:0; padding:0; color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+  a{ color:inherit; }
+
+  /* --- Top bar --- */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 28px; background:var(--ink); color:#EDEFF2;
+  }
+  .brand{ display:flex; align-items:center; gap:10px; }
+  .brand svg{ flex-shrink:0; }
+  .brand-text{ font-weight:600; font-size:17px; letter-spacing:0.2px; }
+  .brand-text .sub{ display:block; font-family:var(--font-mono); font-size:11px; color:#A9B4BE; font-weight:400; letter-spacing:0.5px; text-transform:uppercase; margin-top:1px;}
+  .topnav{ display:flex; gap:6px; }
+  .topnav a{
+    text-decoration:none; color:#C8D0D6; font-size:13.5px; padding:7px 14px; border-radius:20px;
+    transition:background .15s ease, color .15s ease;
+  }
+  .topnav a:hover{ background:rgba(255,255,255,0.08); color:#fff; }
+  .topnav a.active{ background:var(--amber); color:#1c1305; font-weight:600; }
+
+  /* --- Layout --- */
+  .container{ max-width:960px; margin:32px auto 64px; padding:0 20px; }
+  .card{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:28px 32px; box-shadow:0 1px 2px rgba(22,35,58,0.04);
+  }
+  .card + .card{ margin-top:20px; }
+
+  h2{ margin:0 0 4px; font-size:21px; font-weight:600; letter-spacing:-0.2px; }
+  h3{ font-size:15px; font-weight:600; margin:24px 0 4px; }
+  .muted{ color:var(--muted); font-size:13.5px; line-height:1.5; margin:0 0 4px; }
+  .eyebrow{
+    font-family:var(--font-mono); font-size:11px; letter-spacing:1.2px; text-transform:uppercase;
+    color:var(--amber-dark); font-weight:600; margin-bottom:6px; display:block;
+  }
+
+  /* --- Step tracker (encodes the real 3-step flow) --- */
+  .steps{ display:flex; align-items:center; gap:0; margin:0 0 28px; }
+  .step{ display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted); }
+  .step .dot{
+    width:22px; height:22px; border-radius:50%; border:1.5px solid var(--line); display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-mono); font-size:11px; font-weight:600; color:var(--muted); background:var(--surface);
+  }
+  .step.active .dot{ background:var(--ink); border-color:var(--ink); color:#fff; }
+  .step.active{ color:var(--ink); font-weight:600; }
+  .step-line{ width:36px; height:1px; background:var(--line); margin:0 10px; }
+
+  /* --- Flash --- */
+  .flash{
+    background:#FBF0DC; border:1px solid #EED8AA; color:#6B4E12; padding:11px 15px;
+    border-radius:8px; margin-bottom:18px; font-size:13.5px; line-height:1.5;
+  }
+
+  /* --- Forms --- */
+  label{ display:block; margin-top:16px; font-weight:600; font-size:13px; color:var(--ink); }
+  input[type=text], input[type=date], input[type=email], input[type=password], input[type=number], select{
+    width:100%; padding:9px 11px; margin-top:6px; border:1px solid var(--line); border-radius:7px;
+    box-sizing:border-box; font-size:14px; font-family:var(--font-ui); background:#FCFDFD; color:var(--ink);
+    transition:border-color .15s ease;
+  }
+  input:focus, textarea:focus, select:focus{ outline:none; border-color:var(--amber); box-shadow:0 0 0 3px rgba(217,147,46,0.15); }
+  textarea{
+    width:100%; padding:9px 11px; margin-top:6px; border:1px solid var(--line); border-radius:7px;
+    box-sizing:border-box; font-size:13.5px; font-family:var(--font-mono); background:#FCFDFD; color:var(--ink);
+  }
+  .field-hint{ font-size:12px; color:var(--muted); margin-top:4px; }
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+
+  .checkbox-row{ display:flex; align-items:flex-start; margin-top:8px; gap:9px; }
+  .checkbox-row input{ margin-top:3px; width:auto; accent-color:var(--amber-dark); }
+  .checkbox-row label{ margin:0; font-weight:400; font-size:13.5px; }
+
+  /* --- Category chips --- */
+  .chip-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
+  .chip{
+    position:relative; border:1.5px solid var(--line); border-radius:8px; padding:10px 12px 10px 38px;
+    font-size:13px; cursor:pointer; background:#FCFDFD; transition:border-color .15s ease, background .15s ease;
+  }
+  .chip input{ position:absolute; left:12px; top:12px; accent-color:var(--amber-dark); }
+  .chip:has(input:checked){ border-color:var(--amber); background:#FEF8EE; }
+  .chip .cat-name{ font-weight:600; display:block; }
+  .chip .cat-dot{ display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; }
+
+  /* --- Buttons --- */
+  button, .btn{
+    background:var(--ink); color:#fff; border:none; padding:11px 20px; border-radius:8px;
+    font-size:14px; font-weight:600; cursor:pointer; margin-top:22px; margin-right:10px;
+    text-decoration:none; display:inline-block; transition:background .15s ease, transform .05s ease;
+  }
+  button:hover, .btn:hover{ background:#243452; }
+  button:active, .btn:active{ transform:translateY(1px); }
+  .btn-primary{ background:var(--amber-dark); }
+  .btn-primary:hover{ background:#8f5c17; }
+  .btn-secondary{ background:transparent; color:var(--muted); border:1.5px solid var(--line); }
+  .btn-secondary:hover{ background:#F0F2F1; color:var(--ink); }
+  .btn-outline-warn{ background:transparent; color:var(--red); border:1.5px solid #EBC3C0; }
+  .btn-outline-warn:hover{ background:#FBEEED; }
+
+  /* --- Tables --- */
+  table{ width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; }
+  th, td{ border-bottom:1px solid var(--line); padding:8px 10px; text-align:left; }
+  th{ background:transparent; color:var(--muted); font-weight:600; font-size:11.5px; text-transform:uppercase; letter-spacing:0.4px; }
+  td.mono, th.mono{ font-family:var(--font-mono); }
+
+  /* --- Employee review blocks --- */
+  .employee-block{
+    border:1px solid var(--line); border-left:4px solid var(--blue); border-radius:8px;
+    padding:16px 18px; margin-top:14px; background:#FCFDFD;
+  }
+  .employee-block.has-anomaly{ border-left-color:var(--purple); }
+  .employee-block.has-red{ border-left-color:var(--red); }
+  .employee-header{ display:flex; align-items:center; justify-content:space-between; }
+  .employee-name{ font-weight:600; font-size:14.5px; }
+  .employee-code{ font-family:var(--font-mono); color:var(--muted); font-size:12px; margin-left:6px; }
+  .badge{
+    display:inline-block; font-size:11px; padding:3px 9px; border-radius:20px; margin-left:8px;
+    font-weight:600; letter-spacing:0.2px;
+  }
+  .badge-warn{ background:#FBEEED; color:var(--red); }
+  .badge-count{ background:#EEF1F5; color:var(--muted); font-family:var(--font-mono); }
+
+  .cat-tag{
+    display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:600;
+    padding:2px 8px; border-radius:5px;
+  }
+  .cat-late_soft{ background:#FDF1DC; color:#8A5D0A; }
+  .cat-late_hard{ background:#FBE4CE; color:#9A4A0A; }
+  .cat-unfilled_clockin{ background:#E4EDF5; color:var(--blue); }
+  .cat-unfilled_clockout{ background:#DCEDEA; color:var(--teal); }
+  .cat-anomaly{ background:#EEE7FA; color:var(--purple); }
+  .cat-leave_reason_missing{ background:#F8E4E2; color:var(--red); }
+
+  /* --- Stat strip --- */
+  .stat-strip{ display:flex; gap:24px; margin:6px 0 4px; flex-wrap:wrap; }
+  .stat{ font-family:var(--font-mono); }
+  .stat .num{ font-size:22px; font-weight:600; color:var(--ink); display:block; line-height:1.1; }
+  .stat .lbl{ font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; }
+
+  .divider{ height:1px; background:var(--line); margin:22px 0; border:none; }
+
+  ::selection{ background:#F0D9A8; }
+
+  /* --- Custom confirm modal (replaces native confirm()) --- */
+  .modal-overlay{
+    display:none; position:fixed; inset:0; background:rgba(22,35,58,0.45);
+    align-items:center; justify-content:center; z-index:1000; backdrop-filter:blur(1px);
+  }
+  .modal-box{
+    background:var(--surface); border-radius:12px; padding:24px 26px; max-width:380px; width:90%;
+    box-shadow:0 12px 32px rgba(22,35,58,0.25); animation:modalIn .15s ease;
+  }
+  @keyframes modalIn{ from{ opacity:0; transform:translateY(6px) scale(0.98);} to{ opacity:1; transform:none;} }
+  .modal-box h4{ margin:0 0 8px; font-size:15.5px; }
+  .modal-box p{ margin:0 0 4px; font-size:13.5px; color:var(--muted); line-height:1.5; }
+  .modal-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:18px; }
+  .modal-actions button{ margin:0; }
+
+  /* --- Toast (auto-dismissing flash) --- */
+  .toast-wrap{ position:fixed; top:18px; right:18px; z-index:1100; display:flex; flex-direction:column; gap:8px; }
+  .toast{
+    background:var(--ink); color:#fff; padding:11px 16px; border-radius:8px; font-size:13.5px;
+    box-shadow:0 6px 18px rgba(22,35,58,0.25); animation:toastIn .18s ease; max-width:340px;
+  }
+  @keyframes toastIn{ from{ opacity:0; transform:translateX(12px);} to{ opacity:1; transform:none;} }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">
+    <img src="{{ url_for('static', filename='images.png') }}" height="26">
+    <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="1" y="1" width="24" height="24" rx="6" stroke="#D9932E" stroke-width="1.6"/>
+      <text x="13" y="17.5" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" font-weight="600" fill="#EDEFF2">B</text>
+    </svg>
+    <div class="brand-text">Bancapp Automation<span class="sub">Attendance Mailer</span></div>
+  </div>
+  <nav class="topnav">
+    <a href="{{ url_for('index') }}" class="{% if request.endpoint == 'index' %}active{% endif %}">Upload</a>
+    <a href="{{ url_for('employees_page') }}" class="{% if request.endpoint == 'employees_page' %}active{% endif %}">Employees</a>
+    <a href="{{ url_for('history') }}" class="{% if request.endpoint == 'history' %}active{% endif %}">History</a>
+    <a href="{{ url_for('settings') }}" class="{% if request.endpoint == 'settings' %}active{% endif %}">Settings</a>
+  </nav>
+</div>
+<div class="container">
+  {% block content %}{% endblock %}
+</div>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+  <div class="toast-wrap" id="toastWrap">
+    {% for m in messages %}<div class="toast">{{ m }}</div>{% endfor %}
+  </div>
+  {% endif %}
+{% endwith %}
+
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-box">
+    <h4 id="confirmTitle">Are you sure?</h4>
+    <p id="confirmMessage"></p>
+    <div class="modal-actions">
+      <button type="button" class="btn-secondary" onclick="confirmNo()">Cancel</button>
+      <button type="button" class="btn-outline-warn" onclick="confirmYes()" style="background:var(--red);color:#fff;border:none;">Yes, send</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Toasts auto-dismiss after a few seconds
+  (function(){
+    var wrap = document.getElementById('toastWrap');
+    if (wrap) { setTimeout(function(){ wrap.style.transition = 'opacity .3s ease'; wrap.style.opacity = '0'; setTimeout(function(){ wrap.remove(); }, 300); }, 4000); }
+  })();
+
+  // Custom confirm modal, used in place of window.confirm()
+  var _confirmFormId = null, _confirmActionUrl = null;
+  function customConfirm(message, formId, actionUrl){
+    document.getElementById('confirmMessage').textContent = message;
+    document.getElementById('confirmModal').style.display = 'flex';
+    _confirmFormId = formId; _confirmActionUrl = actionUrl;
+  }
+  function confirmYes(){
+    var form = document.getElementById(_confirmFormId);
+    if (_confirmActionUrl) form.action = _confirmActionUrl;
+    document.getElementById('confirmModal').style.display = 'none';
+    form.submit();
+  }
+  function confirmNo(){
+    document.getElementById('confirmModal').style.display = 'none';
+  }
+</script>
+</body>
+</html>

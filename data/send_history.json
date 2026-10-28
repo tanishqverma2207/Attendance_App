@@ -1,0 +1,70 @@
+[
+  {
+    "id": "e0cade19-31c2-4c62-9ebc-9a651bbc2fb8",
+    "timestamp": "31-Jul-2026 15:06",
+    "mode": "reviewed",
+    "date_from": "",
+    "date_to": "",
+    "categories": [
+      "late_soft",
+      "late_hard",
+      "unfilled_clockin",
+      "unfilled_clockout",
+      "anomaly",
+      "leave_reason_missing"
+    ],
+    "results": [
+      {
+        "code": "BA0009",
+        "name": "Ajit Pradhan",
+        "status": "SENT"
+      },
+      {
+        "code": "BA0033",
+        "name": "Amit Kumar Jha",
+        "status": "SENT"
+      },
+      {
+        "code": "BA0004",
+        "name": "Anand Kumar Jha",
+        "status": "SENT"
+      }
+    ],
+    "sent_count": 3,
+    "total_count": 3
+  },
+  {
+    "id": "0b878a47-fad9-482d-96f3-f634f46889e1",
+    "timestamp": "31-Jul-2026 12:47",
+    "mode": "reviewed",
+    "date_from": "",
+    "date_to": "",
+    "categories": [
+      "late_soft",
+      "late_hard",
+      "unfilled_clockin",
+      "unfilled_clockout",
+      "anomaly",
+      "leave_reason_missing"
+    ],
+    "results": [
+      {
+        "code": "BA0009",
+        "name": "Ajit Pradhan",
+        "status": "SENT"
+      },
+      {
+        "code": "BA0033",
+        "name": "Amit Kumar Jha",
+        "status": "SENT"
+      },
+      {
+        "code": "BA0004",
+        "name": "Anand Kumar Jha",
+        "status": "SENT"
+      }
+    ],
+    "sent_count": 3,
+    "total_count": 3
+  }
+]
